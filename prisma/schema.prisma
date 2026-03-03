@@ -1,0 +1,35 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// DATABASE_URL is configured in prisma.config.ts (Prisma 7).
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Expense {
+  id                 String   @id @default(cuid())
+  date               String
+  time               String
+  description        String
+  value              Decimal  @db.Decimal(12, 2)
+  responsible        String
+  card               String
+  category           String
+  type               String
+  installmentCurrent Int?
+  installmentTotal   Int?
+  createdAt          DateTime @default(now())
+}
+
+model AppSettings {
+  id         String @id @default("default")
+  members    Json
+  budgets    Json
+  categories Json
+  cards      Json
+}
