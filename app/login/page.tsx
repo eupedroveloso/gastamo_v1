@@ -4,7 +4,7 @@ import { auth } from "@/lib/auth"
 import { LoginForm } from "@/components/auth/login-form"
 
 type LoginPageProps = {
-  searchParams?: { [key: string]: string | string[] | undefined }
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>
 }
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
@@ -13,7 +13,8 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
     redirect("/dashboard")
   }
 
-  const registeredParam = searchParams?.registered
+  const params = await searchParams
+  const registeredParam = params?.registered
   const justRegistered =
     typeof registeredParam === "string" ? registeredParam === "1" : false
 
