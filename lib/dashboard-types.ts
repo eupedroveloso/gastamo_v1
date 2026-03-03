@@ -23,9 +23,9 @@ export interface BudgetState {
 
 export const DEFAULT_MEMBERS = ["Pedro", "Letícia"]
 export const DEFAULT_BUDGETS: BudgetState = {
-  geral: 10000,
-  Pedro: 3000,
-  Letícia: 3000,
+  geral: 0,
+  Pedro: 0,
+  Letícia: 0,
 }
 
 export const DEFAULT_CATEGORIES = [

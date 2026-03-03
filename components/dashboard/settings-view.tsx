@@ -1,12 +1,13 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useTransition } from "react"
 import { LogOut } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useDashboard } from "@/components/dashboard/dashboard-context"
 import { logoutAction } from "@/app/actions/auth"
+import { resetFamilyDataAction } from "@/app/actions/dashboard"
 import type { BudgetState } from "@/lib/dashboard-types"
 
 
@@ -25,6 +26,8 @@ export function SettingsView() {
   const [newMember, setNewMember] = useState("")
   const [newCategory, setNewCategory] = useState("")
   const [newCard, setNewCard] = useState("")
+  const [resetError, setResetError] = useState<string | null>(null)
+  const [isResetting, startReset] = useTransition()
 
   const handleAddMember = () => {
     const name = newMember.trim()
@@ -241,16 +244,47 @@ export function SettingsView() {
         <h2 className="mb-4 text-[18px] font-semibold text-g-green-text">
           Conta
         </h2>
-        <form action={logoutAction}>
-          <Button
-            type="submit"
-            variant="outline"
-            className="gap-2 rounded-full border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
-          >
-            <LogOut className="size-4" />
-            Sair da conta
-          </Button>
-        </form>
+        <div className="flex flex-col gap-3">
+          {resetError && (
+            <p className="text-[14px] text-red-600">
+              {resetError}
+            </p>
+          )}
+          <div className="flex flex-wrap gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              disabled={isResetting}
+              className="gap-2 rounded-full border-yellow-300 text-yellow-700 hover:bg-yellow-50 hover:text-yellow-800"
+              onClick={() => {
+                if (!confirm("Tem certeza que deseja apagar TODOS os lançamentos e zerar os orçamentos desta família?")) {
+                  return
+                }
+                startReset(async () => {
+                  setResetError(null)
+                  const result = await resetFamilyDataAction()
+                  if (!result.success) {
+                    setResetError(result.error)
+                  } else {
+                    window.location.reload()
+                  }
+                })
+              }}
+            >
+              Resetar dados (zerar tudo)
+            </Button>
+            <form action={logoutAction}>
+              <Button
+                type="submit"
+                variant="outline"
+                className="gap-2 rounded-full border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
+              >
+                <LogOut className="size-4" />
+                Sair da conta
+              </Button>
+            </form>
+          </div>
+        </div>
       </section>
     </div>
   )

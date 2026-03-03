@@ -176,6 +176,8 @@ export type UpdateSettingsResult =
   | { success: true; settings: { members: string[]; initialBudgets: BudgetState; categories: string[]; cards: string[] } }
   | { success: false; error: string }
 
+export type ResetFamilyDataResult = { success: true } | { success: false; error: string }
+
 export async function updateSettingsAction(
   payload: UpdateSettingsPayload
 ): Promise<UpdateSettingsResult> {
@@ -204,6 +206,32 @@ export async function updateSettingsAction(
     }
   } catch (err) {
     const message = err instanceof Error ? err.message : "Erro ao atualizar configurações"
+    return { success: false, error: message }
+  }
+}
+
+export async function resetFamilyDataAction(): Promise<ResetFamilyDataResult> {
+  try {
+    const familyId = await getRequiredFamilyId()
+
+    await prisma.expense.deleteMany({ where: { familyId } })
+
+    const row = await prisma.appSettings.findUnique({ where: { familyId } })
+    if (row) {
+      const members = row.members as string[]
+      const zeroBudgets: BudgetState = { geral: 0 }
+      members.forEach((m) => {
+        zeroBudgets[m] = 0
+      })
+      await prisma.appSettings.update({
+        where: { familyId },
+        data: { budgets: zeroBudgets },
+      })
+    }
+
+    return { success: true }
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Erro ao resetar dados"
     return { success: false, error: message }
   }
 }
