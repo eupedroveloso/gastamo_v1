@@ -139,7 +139,7 @@ export function AddExpenseSheet() {
 
   const isValid =
     numValue > 0 &&
-    responsible &&
+    (responsible || responsible === "Família") &&
     card &&
     category &&
     description &&
@@ -302,7 +302,7 @@ export function AddExpenseSheet() {
               label="Responsável"
               value={responsible}
               onValueChange={(v) => setResponsible(v as Responsible)}
-              options={members.map((m) => ({ value: m, label: m }))}
+              options={[{ value: "Família", label: "Família" }, ...members.map((m) => ({ value: m, label: m }))]}
             />
 
             {/* Cartão */}

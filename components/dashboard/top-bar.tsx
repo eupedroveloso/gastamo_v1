@@ -119,14 +119,22 @@ export function TopBar({
               </div>
 
               {onSearchQueryChange && (
-                <div className="flex items-center rounded-full bg-g-bg px-[18px] py-2">
+                <div className="flex items-center gap-2 rounded-full bg-g-bg px-[18px] py-2">
                   <input
                     type="text"
                     placeholder="Buscar"
                     value={searchQuery ?? ""}
                     onChange={(e) => onSearchQueryChange(e.target.value)}
-                    className="w-[180px] bg-transparent text-[14px] font-medium leading-[1.25em] text-g-green-text placeholder:text-g-muted outline-none"
+                    className="w-[160px] bg-transparent text-[14px] font-medium leading-[1.25em] text-g-green-text placeholder:text-g-muted outline-none"
                   />
+                  <button
+                    type="button"
+                    onClick={() => onSearchQueryChange(searchQuery ?? "")}
+                    className="flex size-7 items-center justify-center rounded-full bg-g-green text-g-green-dark text-[12px] font-semibold"
+                    aria-label="Buscar"
+                  >
+                    🔍
+                  </button>
                 </div>
               )}
             </div>
