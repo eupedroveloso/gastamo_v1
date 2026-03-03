@@ -47,6 +47,7 @@ export const MOCK_EXPENSES: Expense[] = [
     card: "Nubank",
     category: "Alimentação",
     type: "avulso",
+    scope: "member",
   },
   {
     id: "2",
@@ -58,6 +59,7 @@ export const MOCK_EXPENSES: Expense[] = [
     card: "Nubank",
     category: "Alimentação",
     type: "avulso",
+    scope: "member",
   },
   {
     id: "3",
@@ -69,6 +71,7 @@ export const MOCK_EXPENSES: Expense[] = [
     card: "Itaú",
     category: "Alimentação",
     type: "avulso",
+    scope: "member",
   },
   {
     id: "4",
@@ -80,6 +83,7 @@ export const MOCK_EXPENSES: Expense[] = [
     card: "Itaú",
     category: "Transporte",
     type: "avulso",
+    scope: "member",
   },
   {
     id: "5",
@@ -91,5 +95,6 @@ export const MOCK_EXPENSES: Expense[] = [
     card: "Nubank",
     category: "Transporte",
     type: "avulso",
+    scope: "member",
   },
 ]
