@@ -51,7 +51,7 @@ interface DashboardContextValue {
   members: string[]
   setMembers: (members: string[]) => void
   initialBudgets: BudgetState
-  setInitialBudgets: (updater: (prev: BudgetState) => BudgetState) => void
+  setInitialBudgets: (next: BudgetState) => void
   categories: string[]
   setCategories: (categories: string[]) => void
   cards: string[]
@@ -113,13 +113,10 @@ export function DashboardProvider({
     })
   }, [])
 
-  const setInitialBudgets = useCallback((updater: (prev: BudgetState) => BudgetState) => {
-    setInitialBudgetsState((prev) => {
-      const next = updater(prev)
-      updateSettingsAction({ initialBudgets: next }).then((result) => {
-        if (result.success) setInitialBudgetsState(result.settings.initialBudgets)
-      })
-      return next
+  const setInitialBudgets = useCallback((next: BudgetState) => {
+    setInitialBudgetsState(next)
+    updateSettingsAction({ initialBudgets: next }).then((result) => {
+      if (result.success) setInitialBudgetsState(result.settings.initialBudgets)
     })
   }, [])
 

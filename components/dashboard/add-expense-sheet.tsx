@@ -1,9 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { useState, useEffect, useRef } from "react"
+import { X, ChevronDown, Calendar } from "lucide-react"
 import {
   Select,
   SelectContent,
@@ -11,69 +9,141 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetFooter,
-} from "@/components/ui/sheet"
 import { useDashboard } from "@/components/dashboard/dashboard-context"
 import type { ExpenseType, Responsible } from "@/lib/dashboard-types"
 
-const EXPENSE_TYPE_LABELS: Record<ExpenseType, string> = {
-  fixo: "Fixo",
-  avulso: "Avulso",
-  parcelado: "Compra parcelada",
+function formatDisplayValue(raw: string): string {
+  const digits = raw.replace(/\D/g, "")
+  if (!digits) return "R$ 0,00"
+  const cents = parseInt(digits, 10)
+  return (cents / 100).toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+    minimumFractionDigits: 2,
+  })
+}
+
+function PillSelect({
+  label,
+  value,
+  onValueChange,
+  options,
+}: {
+  label: string
+  value: string
+  onValueChange: (v: string) => void
+  options: { value: string; label: string }[]
+}) {
+  return (
+    <Select value={value || undefined} onValueChange={onValueChange}>
+      <SelectTrigger className="h-auto w-full rounded-[32px] border-[#EDF0E7] bg-[#EDF0E7] px-6 py-4 text-[16px] font-medium leading-[1.25em] text-g-green-text shadow-none data-[placeholder]:text-g-muted [&>svg]:hidden">
+        <div className="flex w-full items-center justify-between">
+          <SelectValue placeholder={label} />
+          <ChevronDown className="size-4 shrink-0 text-g-muted" />
+        </div>
+      </SelectTrigger>
+      <SelectContent>
+        {options.map((o) => (
+          <SelectItem key={o.value} value={o.value}>
+            {o.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  )
 }
 
 export function AddExpenseSheet() {
-  const { addSheetOpen, setAddSheetOpen, addSheetType, setAddSheetType, addExpense, members, categories, cards } =
-    useDashboard()
+  const {
+    addSheetOpen,
+    setAddSheetOpen,
+    addSheetType,
+    setAddSheetType,
+    addExpense,
+    members,
+    categories,
+    cards,
+  } = useDashboard()
 
   const now = new Date()
-  const [date, setDate] = useState(() => now.toISOString().slice(0, 10))
-  const [time, setTime] = useState(
-    () => `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`
-  )
+  const [rawValue, setRawValue] = useState("")
   const [description, setDescription] = useState("")
-  const [value, setValue] = useState("")
+  const [type, setType] = useState<ExpenseType>("avulso")
   const [responsible, setResponsible] = useState<Responsible | "">("")
   const [card, setCard] = useState("")
   const [category, setCategory] = useState("")
-  const [type, setType] = useState<ExpenseType>("avulso")
+  const [date, setDate] = useState(() => now.toISOString().slice(0, 10))
+  const [time, setTime] = useState(
+    () =>
+      `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`
+  )
   const [installmentCurrent, setInstallmentCurrent] = useState("")
   const [installmentTotal, setInstallmentTotal] = useState("")
+  const [showDescription, setShowDescription] = useState(false)
+  const descRef = useRef<HTMLInputElement>(null)
+  const dateRef = useRef<HTMLInputElement>(null)
+  const timeRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (addSheetType) setType(addSheetType)
   }, [addSheetType])
 
+  useEffect(() => {
+    if (showDescription && descRef.current) {
+      descRef.current.focus()
+    }
+  }, [showDescription])
+
   const resetForm = () => {
     const n = new Date()
-    setDate(n.toISOString().slice(0, 10))
-    setTime(`${String(n.getHours()).padStart(2, "0")}:${String(n.getMinutes()).padStart(2, "0")}`)
+    setRawValue("")
     setDescription("")
-    setValue("")
+    setType("avulso")
     setResponsible("")
     setCard("")
     setCategory("")
-    setType("avulso")
+    setDate(n.toISOString().slice(0, 10))
+    setTime(
+      `${String(n.getHours()).padStart(2, "0")}:${String(n.getMinutes()).padStart(2, "0")}`
+    )
     setInstallmentCurrent("")
     setInstallmentTotal("")
+    setShowDescription(false)
     setAddSheetType(null)
   }
 
-  const handleOpenChange = (open: boolean) => {
-    setAddSheetOpen(open)
-    if (!open) resetForm()
+  const handleClose = () => {
+    setAddSheetOpen(false)
+    resetForm()
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    const numValue = parseFloat(value.replace(",", "."))
-    if (Number.isNaN(numValue) || numValue <= 0 || !responsible || !card || !category || !description)
+  const numValue = parseInt(rawValue.replace(/\D/g, ""), 10) / 100 || 0
+
+  const handleValueKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Backspace") {
+      e.preventDefault()
+      setRawValue((prev) => prev.slice(0, -1))
       return
+    }
+    if (/^\d$/.test(e.key)) {
+      e.preventDefault()
+      setRawValue((prev) => prev + e.key)
+    }
+  }
+
+  const isValid =
+    numValue > 0 &&
+    responsible &&
+    card &&
+    category &&
+    description &&
+    (type !== "parcelado" ||
+      (installmentCurrent &&
+        installmentTotal &&
+        parseInt(installmentTotal, 10) >= parseInt(installmentCurrent, 10)))
+
+  const handleSubmit = () => {
+    if (!isValid) return
     addExpense({
       date,
       time,
@@ -88,183 +158,205 @@ export function AddExpenseSheet() {
         installmentTotal: parseInt(installmentTotal, 10) || 1,
       }),
     })
-    handleOpenChange(false)
+    handleClose()
   }
 
-  const isValid =
-    value &&
-    parseFloat(value.replace(",", ".")) > 0 &&
-    responsible &&
-    card &&
-    category &&
-    description &&
-    (type !== "parcelado" ||
-      (installmentCurrent &&
-        installmentTotal &&
-        parseInt(installmentTotal, 10) >= parseInt(installmentCurrent, 10)))
+  if (!addSheetOpen) return null
+
+  const TYPE_OPTIONS = [
+    { value: "avulso", label: "Avulso" },
+    { value: "fixo", label: "Fixo" },
+    { value: "parcelado", label: "Parcelado" },
+  ]
+
+  const formattedDate = (() => {
+    const d = new Date(date + "T12:00:00")
+    return d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" })
+  })()
 
   return (
-    <Sheet open={addSheetOpen} onOpenChange={handleOpenChange}>
-      <SheetContent side="right" className="w-full overflow-y-auto bg-white sm:max-w-md">
-        <SheetHeader>
-          <SheetTitle className="text-g-green-text">Inserir novo gasto</SheetTitle>
-        </SheetHeader>
-        <form onSubmit={handleSubmit} className="flex flex-1 flex-col gap-4 px-4">
-          <div className="space-y-2">
-            <Label>Tipo</Label>
-            <Select value={type} onValueChange={(v) => setType(v as ExpenseType)}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="fixo">{EXPENSE_TYPE_LABELS.fixo}</SelectItem>
-                <SelectItem value="avulso">{EXPENSE_TYPE_LABELS.avulso}</SelectItem>
-                <SelectItem value="parcelado">{EXPENSE_TYPE_LABELS.parcelado}</SelectItem>
-              </SelectContent>
-            </Select>
+    <div className="fixed inset-0 z-50 flex items-stretch justify-end">
+      {/* Overlay */}
+      <div
+        className="absolute inset-0 bg-black/30"
+        onClick={handleClose}
+        aria-hidden
+      />
+
+      {/* Panel */}
+      <div className="relative flex w-full max-w-md flex-col justify-between overflow-y-auto rounded-l-[56px] bg-white px-10 pb-8 pt-4 md:max-w-lg">
+        {/* Header */}
+        <div className="flex flex-col gap-6">
+          <div className="flex items-center justify-between px-2 py-6">
+            <span className="text-[16px] font-medium leading-[1.25em] text-g-green-text">
+              Adicionar Gasto
+            </span>
+            <button
+              type="button"
+              onClick={handleClose}
+              className="text-g-green-text transition-opacity hover:opacity-60"
+              aria-label="Fechar"
+            >
+              <X className="size-[13px]" strokeWidth={2.5} />
+            </button>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="description">Descrição</Label>
-            <Input
-              id="description"
-              placeholder="Ex: Café da manhã"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
-          </div>
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="date">Data</Label>
-              <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="time">Hora</Label>
-              <Input id="time" type="time" value={time} onChange={(e) => setTime(e.target.value)} />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="value">Valor (R$)</Label>
-            <Input
-              id="value"
+          {/* Value display */}
+          <div className="border-b border-[#EDF0E7] px-2 pb-3.5">
+            <input
               type="text"
-              placeholder="0,00"
-              value={value}
-              onChange={(e) => setValue(e.target.value)}
+              inputMode="numeric"
+              value={formatDisplayValue(rawValue)}
+              onKeyDown={handleValueKeyDown}
+              onChange={() => {}}
+              className="w-full bg-transparent text-[48px] font-semibold leading-[1.25em] text-g-green outline-none"
+              autoFocus
             />
           </div>
 
-          <div className="space-y-2">
-            <Label>Responsável</Label>
-            <Select value={responsible} onValueChange={(v) => setResponsible(v as Responsible)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione" />
-              </SelectTrigger>
-              <SelectContent>
-                {members.map((m) => (
-                  <SelectItem key={m} value={m}>{m}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label>Cartão</Label>
-            <Select value={card} onValueChange={setCard}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione" />
-              </SelectTrigger>
-              <SelectContent>
-                {cards.map((c) => (
-                  <SelectItem key={c} value={c}>{c}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label>Categoria</Label>
-            <Select value={category} onValueChange={setCategory}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione" />
-              </SelectTrigger>
-              <SelectContent>
-                {categories.map((c) => (
-                  <SelectItem key={c} value={c}>{c}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {type === "parcelado" && (
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="inst-total">Total de parcelas</Label>
-                <Input
-                  id="inst-total"
-                  type="number"
-                  min={1}
-                  max={120}
-                  value={installmentTotal}
-                  onChange={(e) => {
-                    const v = e.target.value
-                    setInstallmentTotal(v)
-                    const total = parseInt(v, 10)
-                    if (total && parseInt(installmentCurrent, 10) > total)
-                      setInstallmentCurrent(String(total))
-                  }}
+          {/* Fields */}
+          <div className="flex flex-col gap-4">
+            {/* Descrição */}
+            {showDescription ? (
+              <div className="flex items-center rounded-[32px] border border-[#EDF0E7] bg-[#EDF0E7] px-6 py-4">
+                <input
+                  ref={descRef}
+                  type="text"
+                  placeholder="Descrição"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  className="w-full bg-transparent text-[16px] font-medium leading-[1.25em] text-g-green-text placeholder:text-g-muted outline-none"
                 />
               </div>
-              <div className="space-y-2">
-                <Label>Parcela atual</Label>
-                {installmentTotal && parseInt(installmentTotal, 10) > 0 ? (
-                  <Select
-                    value={installmentCurrent}
-                    onValueChange={setInstallmentCurrent}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Qual parcela?" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Array.from(
-                        { length: parseInt(installmentTotal, 10) },
-                        (_, i) => i + 1
-                      ).map((n) => (
-                        <SelectItem key={n} value={String(n)}>
-                          {n}ª de {installmentTotal}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                ) : (
-                  <Input
+            ) : (
+              <button
+                type="button"
+                onClick={() => setShowDescription(true)}
+                className="flex items-center justify-between rounded-[32px] border border-[#EDF0E7] bg-[#EDF0E7] px-6 py-4"
+              >
+                <span className="text-[16px] font-medium leading-[1.25em] text-g-muted">
+                  {description || "Descrição"}
+                </span>
+                <ChevronDown className="size-4 text-g-muted" />
+              </button>
+            )}
+
+            {/* Tipo */}
+            <PillSelect
+              label="Tipo"
+              value={type}
+              onValueChange={(v) => setType(v as ExpenseType)}
+              options={TYPE_OPTIONS}
+            />
+
+            {/* Responsável */}
+            <PillSelect
+              label="Responsável"
+              value={responsible}
+              onValueChange={(v) => setResponsible(v as Responsible)}
+              options={members.map((m) => ({ value: m, label: m }))}
+            />
+
+            {/* Cartão */}
+            <PillSelect
+              label="Cartão"
+              value={card}
+              onValueChange={setCard}
+              options={cards.map((c) => ({ value: c, label: c }))}
+            />
+
+            {/* Categoria */}
+            <PillSelect
+              label="Categoria"
+              value={category}
+              onValueChange={setCategory}
+              options={categories.map((c) => ({ value: c, label: c }))}
+            />
+
+            {/* Data e Hora */}
+            <div className="flex items-center justify-between rounded-[32px] border border-[#EDF0E7] bg-[#EDF0E7] px-6 py-4">
+              <button
+                type="button"
+                onClick={() => dateRef.current?.showPicker?.()}
+                className="text-[16px] font-medium leading-[1.25em] text-g-green-text"
+              >
+                {formattedDate} {time}
+              </button>
+              <Calendar className="size-[25px] text-g-green-text" strokeWidth={1.5} />
+              <input
+                ref={dateRef}
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                className="invisible absolute size-0"
+                tabIndex={-1}
+              />
+              <input
+                ref={timeRef}
+                type="time"
+                value={time}
+                onChange={(e) => setTime(e.target.value)}
+                className="invisible absolute size-0"
+                tabIndex={-1}
+              />
+            </div>
+
+            {/* Parcelas (se parcelado) */}
+            {type === "parcelado" && (
+              <div className="flex gap-3">
+                <div className="flex flex-1 items-center rounded-[32px] border border-[#EDF0E7] bg-[#EDF0E7] px-6 py-4">
+                  <input
                     type="number"
                     min={1}
-                    placeholder="Informe o total primeiro"
-                    disabled
-                    className="bg-muted"
+                    max={120}
+                    placeholder="Total parcelas"
+                    value={installmentTotal}
+                    onChange={(e) => {
+                      setInstallmentTotal(e.target.value)
+                      const total = parseInt(e.target.value, 10)
+                      if (total && parseInt(installmentCurrent, 10) > total)
+                        setInstallmentCurrent(String(total))
+                    }}
+                    className="w-full bg-transparent text-[16px] font-medium leading-[1.25em] text-g-green-text placeholder:text-g-muted outline-none"
                   />
+                </div>
+                {installmentTotal && parseInt(installmentTotal, 10) > 0 ? (
+                  <PillSelect
+                    label="Parcela"
+                    value={installmentCurrent}
+                    onValueChange={setInstallmentCurrent}
+                    options={Array.from(
+                      { length: parseInt(installmentTotal, 10) },
+                      (_, i) => ({
+                        value: String(i + 1),
+                        label: `${i + 1}ª de ${installmentTotal}`,
+                      })
+                    )}
+                  />
+                ) : (
+                  <div className="flex flex-1 items-center rounded-[32px] border border-[#EDF0E7] bg-[#EDF0E7] px-6 py-4">
+                    <span className="text-[16px] font-medium leading-[1.25em] text-g-muted">
+                      Parcela
+                    </span>
+                  </div>
                 )}
               </div>
-            </div>
-          )}
+            )}
+          </div>
+        </div>
 
-          <SheetFooter className="mt-auto gap-2">
-            <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>
-              Cancelar
-            </Button>
-            <Button
-              type="submit"
-              disabled={!isValid}
-              className="bg-g-black text-g-white hover:opacity-80"
-            >
-              Inserir gasto
-            </Button>
-          </SheetFooter>
-        </form>
-      </SheetContent>
-    </Sheet>
+        {/* Footer – Inserir button */}
+        <div className="mt-6 flex flex-col gap-2">
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={!isValid}
+            className="flex items-center justify-between rounded-[32px] bg-g-green px-6 py-4 text-[20px] font-medium leading-[1.4em] text-g-green-dark transition-opacity disabled:opacity-40"
+          >
+            <span>Inserir</span>
+          </button>
+        </div>
+      </div>
+    </div>
   )
 }

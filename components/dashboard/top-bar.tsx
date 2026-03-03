@@ -28,16 +28,16 @@ export function TopBar({
   const isListView = view === "list"
 
   const titles: Record<typeof view, string> = {
-    grid: "Gastei",
+    grid: "Orçamento",
     dashboard: "Dashboard",
-    list: "Lançamentos",
+    list: "Gastos",
     settings: "Configurações",
   }
 
   return (
     <div className="flex flex-col gap-3 pl-2 md:flex-row md:items-center md:justify-between">
       <div className="flex items-center justify-between">
-        <span className="text-[16px] font-medium leading-[1.25em] text-g-green-text md:text-[36px] md:font-semibold md:leading-[1.22em]">
+        <span className="text-[16px] font-medium leading-[1.25em] text-g-green-text md:text-[36px] md:font-semibold md:leading-[1.22em] md:text-g-green-dark">
           {titles[view]}
         </span>
         <div className="md:hidden">
@@ -52,7 +52,7 @@ export function TopBar({
               <button
                 type="button"
                 onClick={onAddClick}
-                className="flex h-9 items-center justify-center rounded-full bg-g-green px-4 py-2 text-[14px] font-medium leading-[1.25em] text-g-green-text transition-opacity hover:opacity-90 md:h-10 md:w-[127px] md:text-[16px]"
+                className="flex h-9 items-center justify-center rounded-full bg-g-black px-4 py-2 text-[14px] font-medium leading-[1.25em] text-g-white transition-opacity hover:opacity-90 md:h-10 md:w-[127px] md:text-[16px]"
               >
                 Adicionar
               </button>

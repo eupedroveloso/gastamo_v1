@@ -20,7 +20,7 @@ export default function DashboardPage() {
   const { setAddSheetOpen } = useDashboard()
 
   return (
-    <div className="flex h-screen flex-col gap-4 bg-g-bg p-4 pt-14 md:pt-4">
+    <div className="flex h-screen flex-col gap-4 bg-white p-4 pt-14 md:pt-4">
       <AddExpenseSheet />
 
       {/* Desktop layout – single white card */}

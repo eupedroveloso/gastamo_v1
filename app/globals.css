@@ -95,7 +95,7 @@
   --sidebar-ring: #88DB31;
 }
 
-/* Valor do orçamento – mobile: tamanho fixo; desktop: escala com container query */
+/* Display/lg – Figma: 56px 700 lineHeight 1.214em */
 .budget-value-mobile {
   font-size: 32px;
   font-weight: 600;
@@ -103,17 +103,10 @@
 }
 @media (min-width: 768px) {
   .budget-value-mobile {
-    font-size: clamp(1.5rem, 18cqw, 5rem);
+    font-size: 56px;
     font-weight: 700;
-    line-height: 1.17em;
-    letter-spacing: -0.056em;
+    line-height: 1.214em;
   }
-}
-.budget-value {
-  font-size: clamp(1.5rem, 18cqw, 5rem);
-  font-weight: 700;
-  line-height: 1.17em;
-  letter-spacing: -0.056em;
 }
 .budget-value-person {
   font-size: 20px;
@@ -122,18 +115,9 @@
 }
 @media (min-width: 768px) {
   .budget-value-person {
-    font-size: clamp(1.25rem, 16cqw, 3.5rem);
-    font-weight: 600;
-    line-height: 1.25em;
-  }
-}
-@supports not (container-type: inline-size) {
-  .budget-value-mobile,
-  .budget-value {
-    font-size: clamp(1.5rem, 5vw + 1rem, 5rem);
-  }
-  .budget-value-person {
-    font-size: clamp(1.25rem, 4vw + 0.5rem, 3.5rem);
+    font-size: 56px;
+    font-weight: 700;
+    line-height: 1.214em;
   }
 }
 

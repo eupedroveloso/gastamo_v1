@@ -27,12 +27,12 @@ function PersonCard({
 
   return (
     <div
-      className="group relative flex min-w-0 flex-1 flex-col justify-center gap-1 rounded-[24px] px-4 py-4 md:h-full md:px-10"
+      className="group relative flex min-w-0 flex-1 flex-col justify-center gap-1 rounded-[32px] px-4 py-4 md:h-full md:rounded-[56px] md:px-8 md:py-px"
       style={{ backgroundColor: isDark ? "#327F39" : "#EDF0E7" }}
     >
       <div className="flex w-full min-w-0 items-center gap-2">
         <span
-          className="text-[16px] font-medium leading-[1.25em]"
+          className="text-[16px] font-medium leading-[1.25em] md:text-[20px] md:font-semibold md:leading-[1.4em]"
           style={{ color: isDark ? "#FFFFFF" : "#133A18" }}
         >
           {name}
@@ -45,8 +45,8 @@ function PersonCard({
         R$ {formatCurrency(available)}
       </span>
       <span
-        className="text-[12px] font-normal leading-[1.33em]"
-        style={{ color: isDark ? "#C7FF8D" : "#53950D" }}
+        className="text-[12px] font-normal leading-[1.33em] md:text-[20px] md:leading-[1.4em]"
+        style={{ color: isDark ? "#A8E766" : "#53950D" }}
       >
         Média R$ {formatCurrency(dailyAvg)}/dia
       </span>

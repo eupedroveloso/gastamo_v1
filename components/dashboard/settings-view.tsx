@@ -1,10 +1,12 @@
 "use client"
 
 import { useState } from "react"
+import { LogOut } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useDashboard } from "@/components/dashboard/dashboard-context"
+import { logoutAction } from "@/app/actions/auth"
 import type { BudgetState } from "@/lib/dashboard-types"
 
 
@@ -28,22 +30,20 @@ export function SettingsView() {
     const name = newMember.trim()
     if (!name || members.includes(name)) return
     setMembers([...members, name])
-    setInitialBudgets((prev) => ({ ...prev, [name]: 0 }))
+    setInitialBudgets({ ...initialBudgets, [name]: 0 })
     setNewMember("")
   }
 
   const handleRemoveMember = (name: string) => {
     if (members.length <= 1) return
     setMembers(members.filter((m) => m !== name))
-    setInitialBudgets((prev) => {
-      const next = { ...prev }
-      delete next[name]
-      return next
-    })
+    const next: BudgetState = { ...initialBudgets }
+    delete next[name]
+    setInitialBudgets(next)
   }
 
   const handleBudgetChange = (key: keyof BudgetState, value: number) => {
-    setInitialBudgets((prev) => ({ ...prev, [key]: value }))
+    setInitialBudgets({ ...initialBudgets, [key]: value })
   }
 
   const handleAddCategory = () => {
@@ -234,6 +234,23 @@ export function SettingsView() {
             </li>
           ))}
         </ul>
+      </section>
+
+      {/* Conta */}
+      <section className="rounded-3xl bg-g-bg p-4">
+        <h2 className="mb-4 text-[18px] font-semibold text-g-green-text">
+          Conta
+        </h2>
+        <form action={logoutAction}>
+          <Button
+            type="submit"
+            variant="outline"
+            className="gap-2 rounded-full border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
+          >
+            <LogOut className="size-4" />
+            Sair da conta
+          </Button>
+        </form>
       </section>
     </div>
   )

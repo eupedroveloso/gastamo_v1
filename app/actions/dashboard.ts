@@ -8,8 +8,7 @@ import {
   DEFAULT_CARDS,
   DEFAULT_MEMBERS,
 } from "@/lib/dashboard-types"
-
-const SETTINGS_ID = "default"
+import { getRequiredFamilyId } from "@/lib/auth"
 
 function mapExpenseFromDb(row: {
   id: string
@@ -48,9 +47,13 @@ export type DashboardInitialData = {
 }
 
 export async function getDashboardData(): Promise<DashboardInitialData> {
+  const familyId = await getRequiredFamilyId()
   const [expenses, settings] = await Promise.all([
-    prisma.expense.findMany({ orderBy: { createdAt: "desc" } }),
-    getSettings(),
+    prisma.expense.findMany({
+      where: { familyId },
+      orderBy: { createdAt: "desc" },
+    }),
+    getSettings(familyId),
   ])
   return {
     expenses: expenses.map(mapExpenseFromDb),
@@ -62,7 +65,9 @@ export async function getDashboardData(): Promise<DashboardInitialData> {
 }
 
 export async function getExpenses(): Promise<Expense[]> {
+  const familyId = await getRequiredFamilyId()
   const rows = await prisma.expense.findMany({
+    where: { familyId },
     orderBy: { createdAt: "desc" },
   })
   return rows.map(mapExpenseFromDb)
@@ -76,6 +81,7 @@ export async function addExpenseAction(
   payload: Omit<Expense, "id">
 ): Promise<AddExpenseResult> {
   try {
+    const familyId = await getRequiredFamilyId()
     const row = await prisma.expense.create({
       data: {
         date: payload.date,
@@ -88,6 +94,7 @@ export async function addExpenseAction(
         type: payload.type,
         installmentCurrent: payload.installmentCurrent ?? null,
         installmentTotal: payload.installmentTotal ?? null,
+        familyId,
       },
     })
     return { success: true, expense: mapExpenseFromDb(row) }
@@ -103,7 +110,8 @@ export type RemoveExpenseResult =
 
 export async function removeExpenseAction(id: string): Promise<RemoveExpenseResult> {
   try {
-    await prisma.expense.delete({ where: { id } })
+    const familyId = await getRequiredFamilyId()
+    await prisma.expense.deleteMany({ where: { id, familyId } })
     return { success: true }
   } catch (err) {
     const message = err instanceof Error ? err.message : "Erro ao remover despesa"
@@ -111,19 +119,21 @@ export async function removeExpenseAction(id: string): Promise<RemoveExpenseResu
   }
 }
 
-async function getSettings(): Promise<{
+async function getSettings(
+  familyId: string
+): Promise<{
   members: string[]
   initialBudgets: BudgetState
   categories: string[]
   cards: string[]
 }> {
   let row = await prisma.appSettings.findUnique({
-    where: { id: SETTINGS_ID },
+    where: { familyId },
   })
   if (!row) {
-    await prisma.appSettings.create({
+    row = await prisma.appSettings.create({
       data: {
-        id: SETTINGS_ID,
+        familyId,
         members: DEFAULT_MEMBERS,
         budgets: DEFAULT_BUDGETS,
         categories: DEFAULT_CATEGORIES,
@@ -131,10 +141,10 @@ async function getSettings(): Promise<{
       },
     })
     return {
-      members: DEFAULT_MEMBERS,
-      initialBudgets: DEFAULT_BUDGETS,
-      categories: DEFAULT_CATEGORIES,
-      cards: DEFAULT_CARDS,
+      members: row.members as string[],
+      initialBudgets: row.budgets as BudgetState,
+      categories: row.categories as string[],
+      cards: row.cards as string[],
     }
   }
   return {
@@ -151,7 +161,8 @@ export async function getSettingsAction(): Promise<{
   categories: string[]
   cards: string[]
 }> {
-  return getSettings()
+  const familyId = await getRequiredFamilyId()
+  return getSettings(familyId)
 }
 
 export type UpdateSettingsPayload = {
@@ -169,17 +180,18 @@ export async function updateSettingsAction(
   payload: UpdateSettingsPayload
 ): Promise<UpdateSettingsResult> {
   try {
-    const current = await getSettings()
+    const familyId = await getRequiredFamilyId()
+    const current = await getSettings(familyId)
     const members = payload.members ?? current.members
     const initialBudgets = payload.initialBudgets ?? current.initialBudgets
     const categories = payload.categories ?? current.categories
     const cards = payload.cards ?? current.cards
 
     await prisma.appSettings.upsert({
-      where: { id: SETTINGS_ID },
+      where: { familyId },
       update: { members, budgets: initialBudgets, categories, cards },
       create: {
-        id: SETTINGS_ID,
+        familyId,
         members,
         budgets: initialBudgets,
         categories,

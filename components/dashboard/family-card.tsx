@@ -14,18 +14,18 @@ export function FamilyCard() {
   const { availableBudget, averageDailyThisWeek, setAddSheetOpen } = useDashboard()
 
   return (
-    <div className="group relative flex h-full w-full min-w-0 flex-col justify-center gap-1 rounded-[24px] bg-g-green px-4 py-4 md:px-14">
+    <div className="group relative flex h-full w-full min-w-0 flex-col justify-center gap-1 rounded-[32px] bg-g-green px-4 py-4 md:rounded-[56px] md:px-14">
       <div className="flex w-full min-w-0 items-center gap-2">
-        <span className="text-[16px] font-medium leading-[1.25em] text-g-green-text">
+        <span className="text-[16px] font-medium leading-[1.25em] text-g-green-text md:text-[20px] md:font-semibold md:leading-[1.4em]">
           Família
         </span>
       </div>
       <span
-        className="budget-value-mobile w-full min-w-0 break-words text-g-green-text"
+        className="budget-value-mobile w-full min-w-0 break-words text-g-green-dark"
       >
         R$ {formatCurrency(availableBudget.geral)}
       </span>
-      <span className="text-[12px] font-normal leading-[1.33em] text-g-green-accent">
+      <span className="text-[12px] font-normal leading-[1.33em] text-g-green-accent md:text-[20px] md:leading-[1.4em]">
         Média R$ {formatCurrency(averageDailyThisWeek.geral)}/dia
       </span>
       <button
