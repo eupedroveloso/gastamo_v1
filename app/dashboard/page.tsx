@@ -17,6 +17,11 @@ type TypeFilter = ExpenseType | "todos"
 export default function DashboardPage() {
   const [view, setView] = useState<ViewMode>("grid")
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("avulso")
+  const [searchQuery, setSearchQuery] = useState("")
+  const [month, setMonth] = useState(() => {
+    const now = new Date()
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`
+  })
   const { setAddSheetOpen, userName } = useDashboard()
 
   return (
@@ -36,6 +41,10 @@ export default function DashboardPage() {
           onTypeFilterChange={setTypeFilter}
           onAddClick={() => setAddSheetOpen(true)}
           userName={userName}
+          searchQuery={searchQuery}
+          onSearchQueryChange={setSearchQuery}
+          month={month}
+          onMonthChange={setMonth}
         />
 
         {view === "grid" && (
@@ -81,6 +90,10 @@ export default function DashboardPage() {
             onTypeFilterChange={setTypeFilter}
             onAddClick={() => setAddSheetOpen(true)}
             userName={userName}
+            searchQuery={searchQuery}
+            onSearchQueryChange={setSearchQuery}
+            month={month}
+            onMonthChange={setMonth}
           />
 
           {view === "grid" && (
@@ -111,7 +124,7 @@ export default function DashboardPage() {
                 Adicionar
               </button>
             </div>
-            <TransactionsList typeFilter={typeFilter} />
+            <TransactionsList typeFilter={typeFilter} searchQuery={searchQuery} month={month} />
           </div>
         )}
       </div>

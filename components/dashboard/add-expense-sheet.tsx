@@ -60,6 +60,9 @@ export function AddExpenseSheet() {
     addSheetType,
     setAddSheetType,
     addExpense,
+    updateExpense,
+    editingExpense,
+    clearEditingExpense,
     members,
     categories,
     cards,
@@ -68,6 +71,7 @@ export function AddExpenseSheet() {
   const now = new Date()
   const [rawValue, setRawValue] = useState("")
   const [description, setDescription] = useState("")
+  const [identifier, setIdentifier] = useState("")
   const [type, setType] = useState<ExpenseType>("avulso")
   const [responsible, setResponsible] = useState<Responsible | "">("")
   const [card, setCard] = useState("")
@@ -98,6 +102,7 @@ export function AddExpenseSheet() {
     const n = new Date()
     setRawValue("")
     setDescription("")
+    setIdentifier("")
     setType("avulso")
     setResponsible("")
     setCard("")
@@ -110,6 +115,7 @@ export function AddExpenseSheet() {
     setInstallmentTotal("")
     setShowDescription(false)
     setAddSheetType(null)
+    clearEditingExpense()
   }
 
   const handleClose = () => {
@@ -142,12 +148,37 @@ export function AddExpenseSheet() {
         installmentTotal &&
         parseInt(installmentTotal, 10) >= parseInt(installmentCurrent, 10)))
 
+  const isEditing = !!editingExpense
+
+  useEffect(() => {
+    if (editingExpense) {
+      const cents = Math.round(editingExpense.value * 100)
+      setRawValue(String(cents))
+      setDescription(editingExpense.description)
+      setIdentifier(editingExpense.identifier ?? "")
+      setType(editingExpense.type)
+      setResponsible(editingExpense.responsible as Responsible)
+      setCard(editingExpense.card)
+      setCategory(editingExpense.category)
+      setDate(editingExpense.date)
+      setTime(editingExpense.time)
+      setInstallmentCurrent(
+        editingExpense.installmentCurrent != null ? String(editingExpense.installmentCurrent) : ""
+      )
+      setInstallmentTotal(
+        editingExpense.installmentTotal != null ? String(editingExpense.installmentTotal) : ""
+      )
+      setShowDescription(true)
+    }
+  }, [editingExpense])
+
   const handleSubmit = () => {
     if (!isValid) return
-    addExpense({
+    const payload = {
       date,
       time,
       description,
+      ...(identifier && { identifier }),
       value: numValue,
       responsible: responsible as Responsible,
       card,
@@ -157,7 +188,13 @@ export function AddExpenseSheet() {
         installmentCurrent: parseInt(installmentCurrent, 10) || 1,
         installmentTotal: parseInt(installmentTotal, 10) || 1,
       }),
-    })
+    } as Omit<any, "id">
+
+    if (editingExpense) {
+      updateExpense(editingExpense.id, payload as any)
+    } else {
+      addExpense(payload as any)
+    }
     handleClose()
   }
 
@@ -189,7 +226,7 @@ export function AddExpenseSheet() {
         <div className="flex flex-col gap-6">
           <div className="flex items-center justify-between px-2 py-6">
             <span className="text-[16px] font-medium leading-[1.25em] text-g-green-text">
-              Adicionar Gasto
+              {isEditing ? "Editar Gasto" : "Adicionar Gasto"}
             </span>
             <button
               type="button"
@@ -240,6 +277,17 @@ export function AddExpenseSheet() {
                 <ChevronDown className="size-4 text-g-muted" />
               </button>
             )}
+
+            {/* Identificador da compra */}
+            <div className="flex items-center rounded-[32px] border border-[#EDF0E7] bg-[#EDF0E7] px-6 py-4">
+              <input
+                type="text"
+                placeholder="Identificador da compra"
+                value={identifier}
+                onChange={(e) => setIdentifier(e.target.value)}
+                className="w-full bg-transparent text-[16px] font-medium leading-[1.25em] text-g-green-text placeholder:text-g-muted outline-none"
+              />
+            </div>
 
             {/* Tipo */}
             <PillSelect
@@ -353,7 +401,7 @@ export function AddExpenseSheet() {
             disabled={!isValid}
             className="flex items-center justify-between rounded-[32px] bg-g-green px-6 py-4 text-[20px] font-medium leading-[1.4em] text-g-green-dark transition-opacity disabled:opacity-40"
           >
-            <span>Inserir</span>
+            <span>{isEditing ? "Salvar" : "Inserir"}</span>
           </button>
         </div>
       </div>

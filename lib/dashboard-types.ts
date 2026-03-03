@@ -7,6 +7,7 @@ export interface Expense {
   date: string
   time: string
   description: string
+  identifier?: string
   value: number
   responsible: Responsible
   card: string

@@ -10,6 +10,7 @@ function mapExpenseFromDb(row: {
   date: string
   time: string
   description: string
+  identifier: string | null
   value: unknown
   responsible: string
   card: string
@@ -23,6 +24,7 @@ function mapExpenseFromDb(row: {
     date: row.date,
     time: row.time,
     description: row.description,
+    ...(row.identifier && { identifier: row.identifier }),
     value: Number(row.value),
     responsible: row.responsible,
     card: row.card,
@@ -77,6 +79,10 @@ export type AddExpenseResult =
   | { success: true; expense: Expense }
   | { success: false; error: string }
 
+export type UpdateExpenseResult =
+  | { success: true; expense: Expense }
+  | { success: false; error: string }
+
 export async function addExpenseAction(
   payload: Omit<Expense, "id">
 ): Promise<AddExpenseResult> {
@@ -87,6 +93,7 @@ export async function addExpenseAction(
         date: payload.date,
         time: payload.time,
         description: payload.description,
+        identifier: payload.identifier ?? null,
         value: payload.value,
         responsible: payload.responsible,
         card: payload.card,
@@ -115,6 +122,45 @@ export async function removeExpenseAction(id: string): Promise<RemoveExpenseResu
     return { success: true }
   } catch (err) {
     const message = err instanceof Error ? err.message : "Erro ao remover despesa"
+    return { success: false, error: message }
+  }
+}
+
+export async function updateExpenseAction(
+  id: string,
+  payload: Omit<Expense, "id">
+): Promise<UpdateExpenseResult> {
+  try {
+    const familyId = await getRequiredFamilyId()
+
+    const existing = await prisma.expense.findFirst({
+      where: { id, familyId },
+    })
+
+    if (!existing) {
+      return { success: false, error: "Gasto não encontrado" }
+    }
+
+    const row = await prisma.expense.update({
+      where: { id },
+      data: {
+        date: payload.date,
+        time: payload.time,
+        description: payload.description,
+        identifier: payload.identifier ?? null,
+        value: payload.value,
+        responsible: payload.responsible,
+        card: payload.card,
+        category: payload.category,
+        type: payload.type,
+        installmentCurrent: payload.installmentCurrent ?? null,
+        installmentTotal: payload.installmentTotal ?? null,
+      },
+    })
+
+    return { success: true, expense: mapExpenseFromDb(row) }
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Erro ao atualizar despesa"
     return { success: false, error: message }
   }
 }

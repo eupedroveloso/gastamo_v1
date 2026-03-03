@@ -7,6 +7,7 @@ import {
   addExpenseAction,
   removeExpenseAction,
   updateSettingsAction,
+  updateExpenseAction,
 } from "@/app/actions/dashboard"
 
 function getWeekStart(d: Date): Date {
@@ -39,7 +40,11 @@ interface DashboardContextValue {
   userName: string
   expenses: Expense[]
   addExpense: (expense: Omit<Expense, "id">) => void
+  updateExpense: (id: string, expense: Omit<Expense, "id">) => void
   removeExpense: (id: string) => void
+  editingExpense: Expense | null
+  startEditExpense: (expense: Expense) => void
+  clearEditingExpense: () => void
   members: string[]
   setMembers: (members: string[]) => void
   initialBudgets: BudgetState
@@ -74,6 +79,7 @@ export function DashboardProvider({
   const [cards, setCardsState] = useState<string[]>(initialData?.cards ?? DEFAULT_CARDS)
   const [addSheetOpen, setAddSheetOpen] = useState(false)
   const [addSheetType, setAddSheetType] = useState<ExpenseType | null>(null)
+  const [editingExpense, setEditingExpense] = useState<Expense | null>(null)
 
   const setMembers = useCallback((members: string[]) => {
     setMembersState(members)
@@ -152,6 +158,14 @@ export function DashboardProvider({
     })
   }, [])
 
+  const updateExpense = useCallback((id: string, expense: Omit<Expense, "id">) => {
+    updateExpenseAction(id, expense).then((result) => {
+      if (result.success) {
+        setExpenses((prev) => prev.map((e) => (e.id === id ? result.expense : e)))
+      }
+    })
+  }, [])
+
   const removeExpense = useCallback((id: string) => {
     removeExpenseAction(id).then((result) => {
       if (result.success) {
@@ -160,12 +174,29 @@ export function DashboardProvider({
     })
   }, [])
 
+  const startEditExpense = useCallback(
+    (expense: Expense) => {
+      setEditingExpense(expense)
+      setAddSheetType(expense.type)
+      setAddSheetOpen(true)
+    },
+    []
+  )
+
+  const clearEditingExpense = useCallback(() => {
+    setEditingExpense(null)
+  }, [])
+
   const value = useMemo(
     () => ({
       userName,
       expenses,
       addExpense,
+      updateExpense,
       removeExpense,
+      editingExpense,
+      startEditExpense,
+      clearEditingExpense,
       members,
       setMembers,
       initialBudgets,
@@ -186,7 +217,11 @@ export function DashboardProvider({
       userName,
       expenses,
       addExpense,
+      updateExpense,
       removeExpense,
+      editingExpense,
+      startEditExpense,
+      clearEditingExpense,
       members,
       initialBudgets,
       setInitialBudgets,

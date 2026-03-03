@@ -1,5 +1,6 @@
 "use client"
 
+import { useRef } from "react"
 import Image from "next/image"
 import type { ExpenseType } from "@/lib/dashboard-types"
 import { ViewToggle, type ViewMode } from "@/components/dashboard/view-toggle"
@@ -19,6 +20,10 @@ export function TopBar({
   onTypeFilterChange,
   onAddClick,
   userName,
+  searchQuery,
+  onSearchQueryChange,
+  month,
+  onMonthChange,
 }: {
   view: ViewMode
   onViewChange: (mode: ViewMode) => void
@@ -26,8 +31,21 @@ export function TopBar({
   onTypeFilterChange?: (t: TypeFilter) => void
   onAddClick?: () => void
   userName?: string
+  searchQuery?: string
+  onSearchQueryChange?: (value: string) => void
+  month?: string
+  onMonthChange?: (value: string) => void
 }) {
   const isListView = view === "list"
+
+  const monthInputRef = useRef<HTMLInputElement | null>(null)
+
+  const monthLabel = (() => {
+    if (!month) return "Janeiro"
+    const [y, m] = month.split("-").map(Number)
+    const date = new Date(y, m - 1, 1)
+    return date.toLocaleDateString("pt-BR", { month: "long" })
+  })()
 
   const titles: Record<typeof view, string> = {
     grid: "Orçamento",
@@ -64,13 +82,25 @@ export function TopBar({
                 Adicionar
               </button>
             )}
-            <div className="hidden items-center gap-8 md:flex">
-              <div className="flex items-center gap-2 rounded-full bg-g-bg px-[18px] py-2">
+            <div className="hidden items-center gap-4 md:flex">
+              <button
+                type="button"
+                onClick={() => monthInputRef.current?.showPicker?.()}
+                className="flex items-center gap-2 rounded-full bg-g-bg px-[18px] py-2"
+              >
                 <Image src="/images/calendar.svg" alt="" width={20} height={20} />
-                <span className="text-[16px] font-medium leading-[1.25em] text-g-green-text">
-                  Janeiro
+                <span className="text-[16px] font-medium leading-[1.25em] text-g-green-text capitalize">
+                  {monthLabel}
                 </span>
-              </div>
+                <input
+                  ref={monthInputRef}
+                  type="month"
+                  value={month}
+                  onChange={(e) => onMonthChange?.(e.target.value)}
+                  className="absolute h-0 w-0 opacity-0"
+                  tabIndex={-1}
+                />
+              </button>
 
               <div className="flex items-center gap-2 rounded-full bg-g-bg px-[18px] py-2">
                 {TYPE_FILTERS.map((f) => (
@@ -87,6 +117,18 @@ export function TopBar({
                   </button>
                 ))}
               </div>
+
+              {onSearchQueryChange && (
+                <div className="flex items-center rounded-full bg-g-bg px-[18px] py-2">
+                  <input
+                    type="text"
+                    placeholder="Buscar"
+                    value={searchQuery ?? ""}
+                    onChange={(e) => onSearchQueryChange(e.target.value)}
+                    className="w-[180px] bg-transparent text-[14px] font-medium leading-[1.25em] text-g-green-text placeholder:text-g-muted outline-none"
+                  />
+                </div>
+              )}
             </div>
 
             {/* Filtros mobile */}

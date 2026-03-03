@@ -31,16 +31,18 @@ function TransactionRow({
   expense,
   members,
   onDelete,
+  onEdit,
 }: {
   expense: Expense
   members: string[]
   onDelete: (id: string) => void
+  onEdit: (expense: Expense) => void
 }) {
   return (
     <>
       {/* Desktop */}
       <div className="hidden items-center justify-between gap-4 rounded-[24px] bg-g-white px-6 py-4 md:flex">
-        <div className="flex w-[161px] shrink-0 items-center gap-6">
+        <div className="flex w-[161px] shrink-0 items-center gap-6 min-w-0">
           <div
             className="relative size-[43px] shrink-0 overflow-hidden rounded-full"
             style={{ border: "2.6875px solid #88DB31" }}
@@ -52,7 +54,10 @@ function TransactionRow({
               className="object-cover"
             />
           </div>
-          <span className="text-[16px] font-normal leading-[1.75em] text-g-green-text">
+          <span
+            className="truncate text-[16px] font-normal leading-[1.75em] text-g-green-text"
+            title={expense.identifier || undefined}
+          >
             {expense.description}
           </span>
         </div>
@@ -71,6 +76,13 @@ function TransactionRow({
           <div className="w-[137px] shrink-0 text-right text-[16px] font-medium leading-[1.25em] text-g-green-text">
             R$ {formatCurrency(expense.value)}
           </div>
+          <button
+            type="button"
+            onClick={() => onEdit(expense)}
+            className="rounded-full px-2 py-1 text-[14px] font-medium text-g-muted hover:text-g-green-text hover:bg-g-bg"
+          >
+            Editar
+          </button>
           <button
             type="button"
             onClick={() => onDelete(expense.id)}
@@ -96,8 +108,11 @@ function TransactionRow({
               className="object-cover"
             />
           </div>
-          <div className="flex flex-col gap-0.5">
-            <span className="text-[16px] font-normal leading-[1.75em] text-g-green-text">
+          <div className="flex max-w-[200px] flex-col gap-0.5 md:max-w-none">
+            <span
+              className="truncate text-[16px] font-normal leading-[1.75em] text-g-green-text"
+              title={expense.identifier || undefined}
+            >
               {expense.description}
             </span>
             <span className="text-[12px] font-normal leading-[1.33em] text-g-green-sub">
@@ -107,12 +122,25 @@ function TransactionRow({
         </div>
         <button
           type="button"
+          onClick={() => onEdit(expense)}
+          className="flex flex-col items-end gap-0.5 text-right"
+          aria-label="Editar gasto"
+        >
+          <span className="text-[16px] font-medium leading-[1.25em] text-g-green-text">
+            R$ {formatCurrency(expense.value)}
+          </span>
+          <span className="text-[12px] font-normal leading-[1.33em] text-g-muted">
+            Editar
+          </span>
+        </button>
+        <button
+          type="button"
           onClick={() => onDelete(expense.id)}
           className="flex flex-col items-end gap-0.5 text-right"
           aria-label="Apagar gasto"
         >
           <span className="text-[16px] font-medium leading-[1.25em] text-g-green-text">
-            R$ {formatCurrency(expense.value)}
+            ×
           </span>
           <span className="text-[12px] font-normal leading-[1.33em] text-g-muted">
             Apagar
@@ -125,12 +153,37 @@ function TransactionRow({
 
 export function TransactionsList({
   typeFilter = "todos",
+  searchQuery = "",
+  month,
 }: {
   typeFilter?: ExpenseType | "todos"
+  searchQuery?: string
+  month?: string
 }) {
-  const { expenses, members, removeExpense } = useDashboard()
+  const { expenses, members, removeExpense, startEditExpense } = useDashboard()
 
-  const filtered = typeFilter === "todos" ? expenses : expenses.filter((e) => e.type === typeFilter)
+  let filtered = typeFilter === "todos" ? expenses : expenses.filter((e) => e.type === typeFilter)
+
+  if (month) {
+    const [y, m] = month.split("-").map(Number)
+    filtered = filtered.filter((e) => {
+      const d = new Date(e.date + "T12:00:00")
+      return d.getFullYear() === y && d.getMonth() === m - 1
+    })
+  }
+
+  const q = searchQuery.trim().toLowerCase()
+  if (q) {
+    filtered = filtered.filter((e) => {
+      return (
+        e.description.toLowerCase().includes(q) ||
+        (e.identifier && e.identifier.toLowerCase().includes(q)) ||
+        e.category.toLowerCase().includes(q) ||
+        e.card.toLowerCase().includes(q) ||
+        e.responsible.toLowerCase().includes(q)
+      )
+    })
+  }
 
   const sorted = [...filtered].sort((a, b) => {
     const dateA = new Date(`${a.date}T${a.time}`)
@@ -167,6 +220,7 @@ export function TransactionsList({
               expense={expense}
               members={members}
               onDelete={removeExpense}
+              onEdit={startEditExpense}
             />
             {i < sorted.length - 1 && (
               <div className="h-px w-full bg-g-divider" role="separator" aria-hidden />

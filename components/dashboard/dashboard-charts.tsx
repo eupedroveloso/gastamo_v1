@@ -125,80 +125,159 @@ export function DashboardCharts() {
         </div>
       </div>
 
-      {/* Gráfico de barras: quantidade de gastos por data */}
-      <div className="rounded-3xl bg-g-bg p-4">
-        <h3 className="mb-4 text-[16px] font-semibold text-g-green-text">
-          Gastos por data
-        </h3>
-        <div className="h-[200px] w-full md:h-[260px]">
-          {barData.length === 0 ? (
-            <div className="flex h-full items-center justify-center text-[14px] text-g-muted">
-              Nenhum gasto no período
+      <div className="flex flex-1 flex-col gap-4 md:flex-row">
+        <div className="flex flex-1 flex-col gap-4">
+          {/* Gráfico de barras: quantidade de gastos por data */}
+          <div className="rounded-3xl bg-g-white p-4">
+            <h3 className="mb-4 text-[16px] font-semibold text-g-green-text">
+              Gastos por data
+            </h3>
+            <div className="h-[200px] w-full md:h-[260px]">
+              {barData.length === 0 ? (
+                <div className="flex h-full items-center justify-center text-[14px] text-g-muted">
+                  Nenhum gasto no período
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={barData} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke={GREEN.muted} opacity={0.4} />
+                    <XAxis
+                      dataKey="label"
+                      tick={{ fontSize: 12, fill: GREEN.text }}
+                      axisLine={{ stroke: GREEN.muted }}
+                      tickLine={{ stroke: GREEN.muted }}
+                    />
+                    <YAxis
+                      tick={{ fontSize: 12, fill: GREEN.text }}
+                      axisLine={{ stroke: GREEN.muted }}
+                      tickLine={{ stroke: GREEN.muted }}
+                      allowDecimals={false}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "#fff",
+                        border: `1px solid ${GREEN.muted}`,
+                        borderRadius: "12px",
+                        fontSize: "14px",
+                      }}
+                      labelStyle={{ color: GREEN.text }}
+                      formatter={(value: number | undefined) => [`${value ?? 0} gasto(s)`, "Quantidade"]}
+                      labelFormatter={(label) => label}
+                    />
+                    <Bar
+                      dataKey="quantidade"
+                      fill={GREEN.primary}
+                      radius={[6, 6, 0, 0]}
+                      maxBarSize={48}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
             </div>
-          ) : (
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={barData} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke={GREEN.muted} opacity={0.6} />
-                <XAxis
-                  dataKey="label"
-                  tick={{ fontSize: 12, fill: GREEN.text }}
-                  axisLine={{ stroke: GREEN.muted }}
-                  tickLine={{ stroke: GREEN.muted }}
-                />
-                <YAxis
-                  tick={{ fontSize: 12, fill: GREEN.text }}
-                  axisLine={{ stroke: GREEN.muted }}
-                  tickLine={{ stroke: GREEN.muted }}
-                  allowDecimals={false}
-                />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: "#fff",
-                    border: `1px solid ${GREEN.muted}`,
-                    borderRadius: "12px",
-                    fontSize: "14px",
-                  }}
-                  labelStyle={{ color: GREEN.text }}
-                  formatter={(value: number | undefined) => [`${value ?? 0} gasto(s)`, "Quantidade"]}
-                  labelFormatter={(label) => label}
-                />
-                <Bar
-                  dataKey="quantidade"
-                  fill={GREEN.primary}
-                  radius={[6, 6, 0, 0]}
-                  maxBarSize={48}
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          )}
-        </div>
-      </div>
+          </div>
 
-      {/* Gráfico de linha: valor total por data */}
-      <div className="rounded-3xl bg-g-bg p-4">
-        <h3 className="mb-4 text-[16px] font-semibold text-g-green-text">
-          Valor gasto por data
-        </h3>
-        <div className="h-[200px] w-full md:h-[260px]">
-          {lineData.length === 0 ? (
-            <div className="flex h-full items-center justify-center text-[14px] text-g-muted">
-              Nenhum gasto no período
+          {/* Gráfico de linha: valor total por data */}
+          <div className="rounded-3xl bg-g-white p-4">
+            <h3 className="mb-4 text-[16px] font-semibold text-g-green-text">
+              Valor gasto por data
+            </h3>
+            <div className="h-[200px] w-full md:h-[260px]">
+              {lineData.length === 0 ? (
+                <div className="flex h-full items-center justify-center text-[14px] text-g-muted">
+                  Nenhum gasto no período
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={lineData} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke={GREEN.muted} opacity={0.4} />
+                    <XAxis
+                      dataKey="label"
+                      tick={{ fontSize: 12, fill: GREEN.text }}
+                      axisLine={{ stroke: GREEN.muted }}
+                      tickLine={{ stroke: GREEN.muted }}
+                    />
+                    <YAxis
+                      tick={{ fontSize: 12, fill: GREEN.text }}
+                      axisLine={{ stroke: GREEN.muted }}
+                      tickLine={{ stroke: GREEN.muted }}
+                      tickFormatter={(v) => `R$ ${v}`}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "#fff",
+                        border: `1px solid ${GREEN.muted}`,
+                        borderRadius: "12px",
+                        fontSize: "14px",
+                      }}
+                      labelStyle={{ color: GREEN.text }}
+                      formatter={(value: number | undefined) => [
+                        (value ?? 0).toLocaleString("pt-BR", {
+                          style: "currency",
+                          currency: "BRL",
+                          minimumFractionDigits: 2,
+                        }),
+                        "Total",
+                      ]}
+                      labelFormatter={(label) => label}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="valor"
+                      stroke={GREEN.dark}
+                      strokeWidth={2}
+                      dot={{ fill: GREEN.dark, strokeWidth: 0, r: 4 }}
+                      activeDot={{ r: 6, fill: GREEN.accent, stroke: GREEN.text, strokeWidth: 1 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              )}
             </div>
-          ) : (
+          </div>
+        </div>
+
+        {/* Gráfico de barras por categoria */}
+        <div className="mt-4 rounded-3xl bg-g-white p-4 md:mt-0 md:h-full md:min-w-[280px] md:max-w-xs">
+          <h3 className="mb-4 text-[16px] font-semibold text-g-green-text">
+            Gastos por categoria
+          </h3>
+          <div className="h-[260px] w-full md:h-full">
+            {/* Dados de categoria serão derivados em tempo real */}
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={lineData} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke={GREEN.muted} opacity={0.6} />
+              <BarChart
+                data={(() => {
+                  const byCategory: Record<string, number> = {}
+                  filteredExpenses.forEach((e) => {
+                    byCategory[e.category] = (byCategory[e.category] ?? 0) + e.value
+                  })
+                  return Object.entries(byCategory)
+                    .sort(([, a], [, b]) => (b as number) - (a as number))
+                    .map(([category, total]) => ({
+                      category,
+                      valor: Math.round((total as number) * 100) / 100,
+                    }))
+                })()}
+                layout="vertical"
+                margin={{ top: 8, right: 16, left: 0, bottom: 0 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke={GREEN.muted} opacity={0.4} />
                 <XAxis
-                  dataKey="label"
+                  type="number"
                   tick={{ fontSize: 12, fill: GREEN.text }}
                   axisLine={{ stroke: GREEN.muted }}
                   tickLine={{ stroke: GREEN.muted }}
+                  tickFormatter={(v) =>
+                    `R$ ${Number(v).toLocaleString("pt-BR", {
+                      maximumFractionDigits: 0,
+                    })}`
+                  }
                 />
                 <YAxis
+                  type="category"
+                  dataKey="category"
+                  width={90}
                   tick={{ fontSize: 12, fill: GREEN.text }}
                   axisLine={{ stroke: GREEN.muted }}
                   tickLine={{ stroke: GREEN.muted }}
-                  tickFormatter={(v) => `R$ ${v}`}
                 />
                 <Tooltip
                   contentStyle={{
@@ -212,23 +291,19 @@ export function DashboardCharts() {
                     (value ?? 0).toLocaleString("pt-BR", {
                       style: "currency",
                       currency: "BRL",
-                      minimumFractionDigits: 2,
                     }),
                     "Total",
                   ]}
-                  labelFormatter={(label) => label}
                 />
-                <Line
-                  type="monotone"
+                <Bar
                   dataKey="valor"
-                  stroke={GREEN.dark}
-                  strokeWidth={2}
-                  dot={{ fill: GREEN.dark, strokeWidth: 0, r: 4 }}
-                  activeDot={{ r: 6, fill: GREEN.accent, stroke: GREEN.text, strokeWidth: 1 }}
+                  fill={GREEN.primary}
+                  radius={[0, 6, 6, 0]}
+                  barSize={18}
                 />
-              </LineChart>
+              </BarChart>
             </ResponsiveContainer>
-          )}
+          </div>
         </div>
       </div>
     </div>
