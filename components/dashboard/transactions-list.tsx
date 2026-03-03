@@ -27,7 +27,15 @@ function getAvatarForResponsible(responsible: string, members: string[]) {
 }
 
 /* Card lançamento – Figma 29:30, borderRadius 24px, fill #FFFFFF, padding 16px */
-function TransactionRow({ expense, members }: { expense: Expense; members: string[] }) {
+function TransactionRow({
+  expense,
+  members,
+  onDelete,
+}: {
+  expense: Expense
+  members: string[]
+  onDelete: (id: string) => void
+}) {
   return (
     <>
       {/* Desktop */}
@@ -59,8 +67,18 @@ function TransactionRow({ expense, members }: { expense: Expense; members: strin
             {expense.category}
           </span>
         </div>
-        <div className="w-[137px] shrink-0 text-right text-[16px] font-medium leading-[1.25em] text-g-green-text">
-          R$ {formatCurrency(expense.value)}
+        <div className="flex items-center gap-3">
+          <div className="w-[137px] shrink-0 text-right text-[16px] font-medium leading-[1.25em] text-g-green-text">
+            R$ {formatCurrency(expense.value)}
+          </div>
+          <button
+            type="button"
+            onClick={() => onDelete(expense.id)}
+            className="rounded-full px-2 py-1 text-[14px] font-medium text-g-muted hover:text-g-green-text hover:bg-g-bg"
+            aria-label="Apagar gasto"
+          >
+            ×
+          </button>
         </div>
       </div>
 
@@ -87,11 +105,19 @@ function TransactionRow({ expense, members }: { expense: Expense; members: strin
             </span>
           </div>
         </div>
-        <div className="flex flex-col items-end gap-0.5">
+        <button
+          type="button"
+          onClick={() => onDelete(expense.id)}
+          className="flex flex-col items-end gap-0.5 text-right"
+          aria-label="Apagar gasto"
+        >
           <span className="text-[16px] font-medium leading-[1.25em] text-g-green-text">
             R$ {formatCurrency(expense.value)}
           </span>
-        </div>
+          <span className="text-[12px] font-normal leading-[1.33em] text-g-muted">
+            Apagar
+          </span>
+        </button>
       </div>
     </>
   )
@@ -102,7 +128,7 @@ export function TransactionsList({
 }: {
   typeFilter?: ExpenseType | "todos"
 }) {
-  const { expenses, members } = useDashboard()
+  const { expenses, members, removeExpense } = useDashboard()
 
   const filtered = typeFilter === "todos" ? expenses : expenses.filter((e) => e.type === typeFilter)
 
@@ -137,7 +163,11 @@ export function TransactionsList({
       <div className="flex flex-col gap-px overflow-y-auto">
         {sorted.map((expense, i) => (
           <div key={expense.id} className="w-full">
-            <TransactionRow expense={expense} members={members} />
+            <TransactionRow
+              expense={expense}
+              members={members}
+              onDelete={removeExpense}
+            />
             {i < sorted.length - 1 && (
               <div className="h-px w-full bg-g-divider" role="separator" aria-hidden />
             )}
