@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation"
+
 import { DashboardProvider } from "@/components/dashboard/dashboard-context"
 import { getDashboardData } from "@/app/actions/dashboard"
 
@@ -12,7 +14,9 @@ export default async function DashboardLayout({
   try {
     initialData = await getDashboardData()
   } catch {
-    initialData = undefined
+    // Se não estiver autenticado (ou houver erro ao ler a família),
+    // garantimos que o usuário volte para a tela de login.
+    redirect("/login")
   }
   return (
     <DashboardProvider initialData={initialData}>{children}</DashboardProvider>
