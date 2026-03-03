@@ -5,12 +5,7 @@ import { AuthError } from "next-auth"
 
 import { prisma } from "@/lib/prisma"
 import { signIn, signOut } from "@/lib/auth"
-import {
-  DEFAULT_BUDGETS,
-  DEFAULT_CARDS,
-  DEFAULT_CATEGORIES,
-  DEFAULT_MEMBERS,
-} from "@/lib/dashboard-types"
+import type { BudgetState } from "@/lib/dashboard-types"
 
 type ActionResult = { error?: string; success?: boolean }
 
@@ -81,15 +76,21 @@ export async function registerAction(
     },
   })
 
+  // Para novas famílias:
+  // - membros: apenas o usuário dono da conta
+  // - orçamentos: todos zerados
+  // - categorias/cartões: começam vazios
+  const zeroBudgets: BudgetState = { geral: 0, [name]: 0 }
+
   await prisma.appSettings.create({
     data: {
-      familyId: family.id,
-      members: DEFAULT_MEMBERS,
-      budgets: DEFAULT_BUDGETS,
-      categories: DEFAULT_CATEGORIES,
-      cards: DEFAULT_CARDS,
-    },
-  })
+    familyId: family.id,
+    members: [name],
+    budgets: zeroBudgets,
+    categories: [],
+    cards: [],
+  },
+})
 
   return { success: true }
 }

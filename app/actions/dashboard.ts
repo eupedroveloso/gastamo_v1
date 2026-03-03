@@ -2,12 +2,7 @@
 
 import { prisma } from "@/lib/prisma"
 import type { BudgetState, Expense } from "@/lib/dashboard-types"
-import {
-  DEFAULT_BUDGETS,
-  DEFAULT_CATEGORIES,
-  DEFAULT_CARDS,
-  DEFAULT_MEMBERS,
-} from "@/lib/dashboard-types"
+import { DEFAULT_BUDGETS, DEFAULT_CATEGORIES, DEFAULT_CARDS, DEFAULT_MEMBERS } from "@/lib/dashboard-types"
 import { getRequiredFamilyId } from "@/lib/auth"
 
 function mapExpenseFromDb(row: {
@@ -131,6 +126,8 @@ async function getSettings(
     where: { familyId },
   })
   if (!row) {
+    // Fallback extremamente raro: família sem AppSettings.
+    // Criamos um registro mínimo, sem membros/cartões/categorias e orçamentos zerados.
     row = await prisma.appSettings.create({
       data: {
         familyId,

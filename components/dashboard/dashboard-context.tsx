@@ -1,16 +1,7 @@
 "use client"
 
 import React, { createContext, useCallback, useContext, useMemo, useState } from "react"
-import {
-  type Expense,
-  type BudgetState,
-  type ExpenseType,
-  DEFAULT_BUDGETS,
-  DEFAULT_CATEGORIES,
-  DEFAULT_CARDS,
-  DEFAULT_MEMBERS,
-  MOCK_EXPENSES,
-} from "@/lib/dashboard-types"
+import { type Expense, type BudgetState, type ExpenseType, DEFAULT_BUDGETS, DEFAULT_CATEGORIES, DEFAULT_CARDS, DEFAULT_MEMBERS } from "@/lib/dashboard-types"
 import type { DashboardInitialData } from "@/app/actions/dashboard"
 import {
   addExpenseAction,
@@ -74,21 +65,11 @@ export function DashboardProvider({
   children: React.ReactNode
   initialData?: DashboardInitialData
 }) {
-  const [expenses, setExpenses] = useState<Expense[]>(
-    initialData?.expenses ?? MOCK_EXPENSES
-  )
-  const [members, setMembersState] = useState<string[]>(
-    initialData?.members ?? DEFAULT_MEMBERS
-  )
-  const [initialBudgets, setInitialBudgetsState] = useState<BudgetState>(
-    initialData?.initialBudgets ?? DEFAULT_BUDGETS
-  )
-  const [categories, setCategoriesState] = useState<string[]>(
-    initialData?.categories ?? DEFAULT_CATEGORIES
-  )
-  const [cards, setCardsState] = useState<string[]>(
-    initialData?.cards ?? DEFAULT_CARDS
-  )
+  const [expenses, setExpenses] = useState<Expense[]>(initialData?.expenses ?? [])
+  const [members, setMembersState] = useState<string[]>(initialData?.members ?? DEFAULT_MEMBERS)
+  const [initialBudgets, setInitialBudgetsState] = useState<BudgetState>(initialData?.initialBudgets ?? DEFAULT_BUDGETS)
+  const [categories, setCategoriesState] = useState<string[]>(initialData?.categories ?? DEFAULT_CATEGORIES)
+  const [cards, setCardsState] = useState<string[]>(initialData?.cards ?? DEFAULT_CARDS)
   const [addSheetOpen, setAddSheetOpen] = useState(false)
   const [addSheetType, setAddSheetType] = useState<ExpenseType | null>(null)
 

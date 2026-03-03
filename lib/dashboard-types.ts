@@ -21,24 +21,16 @@ export interface BudgetState {
   [memberKey: string]: number
 }
 
-export const DEFAULT_MEMBERS = ["Pedro", "Letícia"]
+// Valores padrão usados apenas como fallback em casos excepcionais.
+// Para novas famílias, usamos dados dinâmicos criados no registro.
+export const DEFAULT_MEMBERS: string[] = []
 export const DEFAULT_BUDGETS: BudgetState = {
   geral: 0,
-  Pedro: 0,
-  Letícia: 0,
 }
 
-export const DEFAULT_CATEGORIES = [
-  "Alimentação",
-  "Moradia",
-  "Transporte",
-  "Lazer",
-  "Saúde",
-  "Educação",
-  "Outros",
-]
+export const DEFAULT_CATEGORIES: string[] = []
 
-export const DEFAULT_CARDS = ["Nubank", "Itaú", "Dinheiro"]
+export const DEFAULT_CARDS: string[] = []
 
 export const MOCK_EXPENSES: Expense[] = [
   {
