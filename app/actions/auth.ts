@@ -2,6 +2,7 @@
 
 import bcrypt from "bcryptjs"
 import { AuthError } from "next-auth"
+import { redirect } from "next/navigation"
 
 import { prisma } from "@/lib/prisma"
 import { signIn, signOut } from "@/lib/auth"
@@ -24,15 +25,16 @@ export async function loginAction(
     await signIn("credentials", {
       email,
       password,
-      redirectTo: "/dashboard",
+      redirect: false,
     })
-    return { success: true }
   } catch (err) {
     if (err instanceof AuthError) {
       return { error: "Email ou senha incorretos" }
     }
     throw err
   }
+
+  redirect("/dashboard")
 }
 
 export async function registerAction(
@@ -96,5 +98,6 @@ export async function registerAction(
 }
 
 export async function logoutAction() {
-  await signOut({ redirectTo: "/login" })
+  await signOut({ redirect: false })
+  redirect("/login")
 }
