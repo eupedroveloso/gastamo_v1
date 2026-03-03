@@ -36,6 +36,7 @@ function daysElapsedInCurrentWeek(): number {
 }
 
 interface DashboardContextValue {
+  userName: string
   expenses: Expense[]
   addExpense: (expense: Omit<Expense, "id">) => void
   removeExpense: (id: string) => void
@@ -65,6 +66,7 @@ export function DashboardProvider({
   children: React.ReactNode
   initialData?: DashboardInitialData
 }) {
+  const userName = initialData?.userName ?? ""
   const [expenses, setExpenses] = useState<Expense[]>(initialData?.expenses ?? [])
   const [members, setMembersState] = useState<string[]>(initialData?.members ?? DEFAULT_MEMBERS)
   const [initialBudgets, setInitialBudgetsState] = useState<BudgetState>(initialData?.initialBudgets ?? DEFAULT_BUDGETS)
@@ -160,6 +162,7 @@ export function DashboardProvider({
 
   const value = useMemo(
     () => ({
+      userName,
       expenses,
       addExpense,
       removeExpense,
@@ -180,6 +183,7 @@ export function DashboardProvider({
       setAddSheetType,
     }),
     [
+      userName,
       expenses,
       addExpense,
       removeExpense,

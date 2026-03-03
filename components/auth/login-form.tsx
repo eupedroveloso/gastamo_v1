@@ -1,20 +1,12 @@
 "use client"
 
-import { useActionState, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useActionState } from "react"
 import Link from "next/link"
 
 import { loginAction } from "@/app/actions/auth"
 
 export function LoginForm({ justRegistered = false }: { justRegistered?: boolean }) {
-  const router = useRouter()
   const [state, formAction, pending] = useActionState(loginAction, {})
-
-  useEffect(() => {
-    if (state.success) {
-      router.push("/dashboard")
-    }
-  }, [state.success, router])
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-white px-4">

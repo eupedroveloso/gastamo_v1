@@ -3,7 +3,7 @@
 import { prisma } from "@/lib/prisma"
 import type { BudgetState, Expense } from "@/lib/dashboard-types"
 import { DEFAULT_BUDGETS, DEFAULT_CATEGORIES, DEFAULT_CARDS, DEFAULT_MEMBERS } from "@/lib/dashboard-types"
-import { getRequiredFamilyId } from "@/lib/auth"
+import { auth, getRequiredFamilyId } from "@/lib/auth"
 
 function mapExpenseFromDb(row: {
   id: string
@@ -39,10 +39,14 @@ export type DashboardInitialData = {
   initialBudgets: BudgetState
   categories: string[]
   cards: string[]
+  userName: string
 }
 
 export async function getDashboardData(): Promise<DashboardInitialData> {
   const familyId = await getRequiredFamilyId()
+  const session = await auth()
+  const userName = session?.user?.name ?? ""
+
   const [expenses, settings] = await Promise.all([
     prisma.expense.findMany({
       where: { familyId },
@@ -56,6 +60,7 @@ export async function getDashboardData(): Promise<DashboardInitialData> {
     initialBudgets: settings.initialBudgets,
     categories: settings.categories,
     cards: settings.cards,
+    userName,
   }
 }
 

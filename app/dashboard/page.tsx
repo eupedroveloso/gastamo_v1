@@ -17,7 +17,7 @@ type TypeFilter = ExpenseType | "todos"
 export default function DashboardPage() {
   const [view, setView] = useState<ViewMode>("grid")
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("avulso")
-  const { setAddSheetOpen } = useDashboard()
+  const { setAddSheetOpen, userName } = useDashboard()
 
   return (
     <div className="flex h-screen flex-col gap-4 bg-white p-4 pt-14 md:pt-4">
@@ -35,6 +35,7 @@ export default function DashboardPage() {
           typeFilter={typeFilter}
           onTypeFilterChange={setTypeFilter}
           onAddClick={() => setAddSheetOpen(true)}
+          userName={userName}
         />
 
         {view === "grid" && (
@@ -79,6 +80,7 @@ export default function DashboardPage() {
             typeFilter={typeFilter}
             onTypeFilterChange={setTypeFilter}
             onAddClick={() => setAddSheetOpen(true)}
+            userName={userName}
           />
 
           {view === "grid" && (

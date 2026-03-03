@@ -18,12 +18,14 @@ export function TopBar({
   typeFilter,
   onTypeFilterChange,
   onAddClick,
+  userName,
 }: {
   view: ViewMode
   onViewChange: (mode: ViewMode) => void
   typeFilter?: TypeFilter
   onTypeFilterChange?: (t: TypeFilter) => void
   onAddClick?: () => void
+  userName?: string
 }) {
   const isListView = view === "list"
 
@@ -40,7 +42,12 @@ export function TopBar({
         <span className="text-[16px] font-medium leading-[1.25em] text-g-green-text md:text-[36px] md:font-semibold md:leading-[1.22em] md:text-g-green-dark">
           {titles[view]}
         </span>
-        <div className="md:hidden">
+        <div className="flex items-center gap-3 md:hidden">
+          {userName && (
+            <span className="text-[13px] font-medium text-g-muted">
+              Olá, {userName}
+            </span>
+          )}
           <ViewToggle value={view} onChange={onViewChange} />
         </div>
       </div>
@@ -103,7 +110,12 @@ export function TopBar({
           </>
         )}
 
-        <div className="hidden md:block">
+        <div className="hidden items-center gap-3 md:flex">
+          {userName && (
+            <span className="text-[16px] font-medium text-g-muted">
+              Olá, {userName}
+            </span>
+          )}
           <ViewToggle value={view} onChange={onViewChange} />
         </div>
       </div>
