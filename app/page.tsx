@@ -3,7 +3,13 @@ import { redirect } from "next/navigation"
 import { auth } from "@/lib/auth"
 
 export default async function Home() {
-  const session = await auth()
+  let session = null
+  try {
+    session = await auth()
+  } catch {
+    // auth failed — treat as unauthenticated
+  }
+
   if (session?.user) {
     redirect("/dashboard")
   } else {
