@@ -113,7 +113,9 @@ export function DashboardProvider({
     const geral = expenses.reduce((s, e) => s + e.value, 0)
     const byMember: BudgetState = { geral }
     members.forEach((m) => {
-      byMember[m] = expenses.filter((e) => e.responsible === m).reduce((s, e) => s + e.value, 0)
+      byMember[m] = expenses
+        .filter((e) => e.scope !== "family" && e.responsible === m)
+        .reduce((s, e) => s + e.value, 0)
     })
     return byMember
   }, [expenses, members])
@@ -133,7 +135,7 @@ export function DashboardProvider({
     const byMember: BudgetState = { geral }
     members.forEach((m) => {
       byMember[m] = expenses
-        .filter((e) => e.responsible === m && isInCurrentWeek(e.date))
+        .filter((e) => e.scope !== "family" && e.responsible === m && isInCurrentWeek(e.date))
         .reduce((s, e) => s + e.value, 0)
     })
     return byMember

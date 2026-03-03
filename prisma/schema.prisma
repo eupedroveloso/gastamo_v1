@@ -41,6 +41,7 @@ model Expense {
   card               String
   category           String
   type               String
+  scope              String   @default("member")
   installmentCurrent Int?
   installmentTotal   Int?
   createdAt          DateTime @default(now())

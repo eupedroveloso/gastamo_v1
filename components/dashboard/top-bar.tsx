@@ -119,7 +119,7 @@ export function TopBar({
               </div>
 
               {onSearchQueryChange && (
-                <div className="flex items-center gap-2 rounded-full bg-g-bg px-[18px] py-2">
+                <div className="flex items-center gap-2 rounded-full bg-g-bg px-[14px] py-2">
                   <input
                     type="text"
                     placeholder="Buscar"
@@ -129,8 +129,11 @@ export function TopBar({
                   />
                   <button
                     type="button"
-                    onClick={() => onSearchQueryChange(searchQuery ?? "")}
-                    className="flex size-7 items-center justify-center rounded-full bg-g-green text-g-green-dark text-[12px] font-semibold"
+                    onClick={() => {
+                      // Apenas garante que o valor atual seja usado; filtro já é reativo
+                      onSearchQueryChange(searchQuery ?? "")
+                    }}
+                    className="flex size-7 items-center justify-center rounded-full bg-g-green text-g-green-dark text-[13px] font-semibold"
                     aria-label="Buscar"
                   >
                     🔍

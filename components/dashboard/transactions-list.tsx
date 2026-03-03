@@ -180,7 +180,8 @@ export function TransactionsList({
         (e.identifier && e.identifier.toLowerCase().includes(q)) ||
         e.category.toLowerCase().includes(q) ||
         e.card.toLowerCase().includes(q) ||
-        e.responsible.toLowerCase().includes(q)
+        e.responsible.toLowerCase().includes(q) ||
+        (e.scope === "family" && "família".includes(q))
       )
     })
   }

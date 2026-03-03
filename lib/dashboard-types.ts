@@ -1,5 +1,7 @@
 export type ExpenseType = "fixo" | "avulso" | "parcelado"
 
+export type ExpenseScope = "member" | "family"
+
 export type Responsible = string
 
 export interface Expense {
@@ -15,6 +17,7 @@ export interface Expense {
   type: ExpenseType
   installmentCurrent?: number
   installmentTotal?: number
+  scope: ExpenseScope
 }
 
 export interface BudgetState {

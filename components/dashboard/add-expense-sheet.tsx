@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { useDashboard } from "@/components/dashboard/dashboard-context"
-import type { ExpenseType, Responsible } from "@/lib/dashboard-types"
+import type { ExpenseScope, ExpenseType, Responsible } from "@/lib/dashboard-types"
 
 function formatDisplayValue(raw: string): string {
   const digits = raw.replace(/\D/g, "")
@@ -73,6 +73,7 @@ export function AddExpenseSheet() {
   const [description, setDescription] = useState("")
   const [identifier, setIdentifier] = useState("")
   const [type, setType] = useState<ExpenseType>("avulso")
+  const [scope, setScope] = useState<ExpenseScope>("member")
   const [responsible, setResponsible] = useState<Responsible | "">("")
   const [card, setCard] = useState("")
   const [category, setCategory] = useState("")
@@ -104,6 +105,7 @@ export function AddExpenseSheet() {
     setDescription("")
     setIdentifier("")
     setType("avulso")
+    setScope("member")
     setResponsible("")
     setCard("")
     setCategory("")
@@ -139,7 +141,7 @@ export function AddExpenseSheet() {
 
   const isValid =
     numValue > 0 &&
-    (responsible || responsible === "Família") &&
+    responsible &&
     card &&
     category &&
     description &&
@@ -157,6 +159,7 @@ export function AddExpenseSheet() {
       setDescription(editingExpense.description)
       setIdentifier(editingExpense.identifier ?? "")
       setType(editingExpense.type)
+      setScope(editingExpense.scope ?? "member")
       setResponsible(editingExpense.responsible as Responsible)
       setCard(editingExpense.card)
       setCategory(editingExpense.category)
@@ -180,6 +183,7 @@ export function AddExpenseSheet() {
       description,
       ...(identifier && { identifier }),
       value: numValue,
+      scope,
       responsible: responsible as Responsible,
       card,
       category,
@@ -289,6 +293,17 @@ export function AddExpenseSheet() {
               />
             </div>
 
+            {/* Escopo do gasto: família ou membro */}
+            <PillSelect
+              label="Para quem é o gasto"
+              value={scope}
+              onValueChange={(v) => setScope((v as ExpenseScope) ?? "member")}
+              options={[
+                { value: "member", label: "Pessoal" },
+                { value: "family", label: "Família" },
+              ]}
+            />
+
             {/* Tipo */}
             <PillSelect
               label="Tipo"
@@ -302,7 +317,7 @@ export function AddExpenseSheet() {
               label="Responsável"
               value={responsible}
               onValueChange={(v) => setResponsible(v as Responsible)}
-              options={[{ value: "Família", label: "Família" }, ...members.map((m) => ({ value: m, label: m }))]}
+              options={members.map((m) => ({ value: m, label: m }))}
             />
 
             {/* Cartão */}

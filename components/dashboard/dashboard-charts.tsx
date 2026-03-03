@@ -15,7 +15,7 @@ import {
 import { useDashboard } from "@/components/dashboard/dashboard-context"
 import type { Responsible } from "@/lib/dashboard-types"
 
-export type DashboardResponsibleFilter = "Família" | Responsible
+export type DashboardResponsibleFilter = "família" | Responsible
 
 /* Escala de verde do sistema */
 const GREEN = {
@@ -43,10 +43,10 @@ function formatShortDate(dateStr: string): string {
 
 export function DashboardCharts() {
   const { expenses, members } = useDashboard()
-  const [responsibleFilter, setResponsibleFilter] = useState<DashboardResponsibleFilter>("Família")
+  const [responsibleFilter, setResponsibleFilter] = useState<DashboardResponsibleFilter>("família")
 
   const responsibleFilters: { value: DashboardResponsibleFilter; label: string }[] = [
-    { value: "Família", label: "Família" },
+    { value: "família", label: "Família" },
     ...members.map((m) => ({ value: m as DashboardResponsibleFilter, label: m })),
   ]
   const [month, setMonth] = useState(() => {

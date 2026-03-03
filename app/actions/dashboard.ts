@@ -16,6 +16,7 @@ function mapExpenseFromDb(row: {
   card: string
   category: string
   type: string
+  scope: string | null
   installmentCurrent: number | null
   installmentTotal: number | null
 }): Expense {
@@ -30,6 +31,7 @@ function mapExpenseFromDb(row: {
     card: row.card,
     category: row.category,
     type: row.type as Expense["type"],
+    scope: (row.scope as Expense["scope"]) ?? "member",
     ...(row.installmentCurrent != null && { installmentCurrent: row.installmentCurrent }),
     ...(row.installmentTotal != null && { installmentTotal: row.installmentTotal }),
   }
@@ -99,6 +101,7 @@ export async function addExpenseAction(
         card: payload.card,
         category: payload.category,
         type: payload.type,
+        scope: payload.scope ?? "member",
         installmentCurrent: payload.installmentCurrent ?? null,
         installmentTotal: payload.installmentTotal ?? null,
         familyId,
@@ -153,6 +156,7 @@ export async function updateExpenseAction(
         card: payload.card,
         category: payload.category,
         type: payload.type,
+        scope: payload.scope ?? "member",
         installmentCurrent: payload.installmentCurrent ?? null,
         installmentTotal: payload.installmentTotal ?? null,
       },
