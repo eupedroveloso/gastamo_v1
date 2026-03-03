@@ -9,7 +9,7 @@ type LoginPageProps = {
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const session = await auth()
-  if (session) {
+  if (session?.user) {
     redirect("/dashboard")
   }
 
